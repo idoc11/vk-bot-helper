@@ -3,32 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>VK Bot Helper</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             margin: 0;
             padding: 20px;
         }
-        
         .container {
-            max-width: 600px;
+            max-width: 500px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
-        
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        
         button {
             width: 100%;
             padding: 15px;
@@ -36,225 +26,62 @@
             border: none;
             border-radius: 10px;
             font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
             background: #667eea;
             color: white;
+            cursor: pointer;
         }
-        
-        button:active {
-            transform: scale(0.98);
-        }
-        
-        .info {
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            font-size: 14px;
-            text-align: center;
-        }
-        
-        .status {
-            background: #e6fffa;
-            border-left: 4px solid #38b2ac;
-            padding: 10px;
-            margin-top: 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            text-align: center;
-        }
-        
-        .error {
-            background: #fed7d7;
-            border-left-color: #fc8181;
-            color: #c53030;
-        }
-        
-        .success {
-            background: #e6fffa;
-            border-left-color: #38b2ac;
-            color: #234e52;
-        }
+        h1 { text-align: center; color: #333; }
+        .info { background: #f0f0f0; padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📱 VK Bot Helper</h1>
         
-        <button onclick="sendToBot()">💬 Отправить сообщение боту</button>
+        <button onclick="sendToBot()">💬 Написать боту</button>
         <button onclick="sendNote()">📝 Отправить заметку</button>
         <button onclick="sendWeather()">🌤 Узнать погоду</button>
-        <button onclick="closeApp()">❌ Закрыть приложение</button>
         
-        <div class="info" id="userInfo">
-            Загрузка информации...
-        </div>
-        
-        <div class="status" id="status">
-            ⏳ Инициализация...
+        <div class="info" id="info">
+            👋 Привет! Нажми на кнопку, чтобы написать боту
         </div>
     </div>
     
-    <script src="https://vk.com/js/api/openapi.js?169"></script>
     <script>
-        // ID вашего приложения
-        var APP_ID = 54495928;
+        // ID сообщества (куда отправлять сообщения)
+        // Нужно заменить на ID вашего сообщества с знаком минус
+        var GROUP_ID = "-217249761";  // ID вашего сообщества
         
-        // Функция для обновления статуса
-        function updateStatus(text, isError) {
-            var statusDiv = document.getElementById("status");
-            statusDiv.innerHTML = text;
-            if (isError) {
-                statusDiv.className = "status error";
-            } else {
-                statusDiv.className = "status success";
-            }
-        }
-        
-        // Функция отправки сообщения через VK
-        function sendMessageToVK(message) {
-            return new Promise(function(resolve, reject) {
-                try {
-                    // Пытаемся использовать VK Bridge
-                    if (window.VK && VK.callMethod) {
-                        VK.callMethod("VKWebAppSendMessage", {
-                            "message": message
-                        }, function(result) {
-                            resolve(result);
-                        });
-                    } 
-                    // Альтернативный способ через location
-                    else if (window.location.href.includes("vk.com")) {
-                        // Отправляем через открытие диалога с ботом
-                        window.open("https://vk.com/im?sel=-217249761&msg=" + encodeURIComponent(message), "_blank");
-                        resolve({success: true});
-                    }
-                    else {
-                        reject(new Error("VK API не загружен"));
-                    }
-                } catch(e) {
-                    reject(e);
-                }
-            });
-        }
-        
-        // Проверяем загрузку VK API
-        function waitForVK() {
-            return new Promise(function(resolve) {
-                if (window.VK && VK.init) {
-                    resolve();
-                } else {
-                    var checkInterval = setInterval(function() {
-                        if (window.VK && VK.init) {
-                            clearInterval(checkInterval);
-                            resolve();
-                        }
-                    }, 100);
-                    setTimeout(function() {
-                        clearInterval(checkInterval);
-                        resolve();
-                    }, 5000);
-                }
-            });
-        }
-        
-        // Инициализация приложения
-        async function initApp() {
-            try {
-                await waitForVK();
-                
-                if (window.VK && VK.init) {
-                    VK.init({apiId: APP_ID});
-                    updateStatus("✅ VK API инициализирован");
-                } else {
-                    updateStatus("⚠️ VK API не загружен, но приложение работает", true);
-                }
-                
-                // Получаем информацию о пользователе
-                if (window.VK && VK.callMethod) {
-                    VK.callMethod("VKWebAppGetUserInfo", {}, function(data) {
-                        console.log("Пользователь:", data);
-                        if (data && data.id) {
-                            document.getElementById("userInfo").innerHTML = 
-                                "👤 Ваш ID: " + data.id + "<br>" +
-                                "👋 Привет, " + (data.first_name || "пользователь");
-                            updateStatus("✅ Приложение готово! Ваш ID: " + data.id);
-                        }
-                    });
-                } else {
-                    document.getElementById("userInfo").innerHTML = "⚠️ VK API недоступен, но вы можете использовать кнопки";
-                    updateStatus("✅ Приложение готово (ограниченный режим)");
-                }
-            } catch(e) {
-                console.error("Ошибка инициализации:", e);
-                updateStatus("⚠️ Приложение работает в ограниченном режиме", true);
-                document.getElementById("userInfo").innerHTML = "⚠️ VK API недоступен. Сообщения будут открываться в новом окне.";
-            }
-        }
-        
-        // Отправка сообщения боту
         function sendToBot() {
-            var message = prompt("Введите сообщение для бота:", "привет");
-            if (message) {
-                sendMessageToVK(message).then(function() {
-                    updateStatus("✅ Сообщение отправлено: " + message);
-                    setTimeout(function() {
-                        updateStatus("✅ Приложение готово");
-                    }, 2000);
-                }).catch(function(e) {
-                    console.error("Ошибка:", e);
-                    updateStatus("❌ Ошибка отправки, но сообщение скопировано в буфер", true);
-                    navigator.clipboard.writeText(message);
-                });
+            var msg = prompt("Введите сообщение:", "привет");
+            if (msg) {
+                window.open("https://vk.com/im?sel=" + GROUP_ID + "&msg=" + encodeURIComponent(msg), "_blank");
+                document.getElementById("info").innerHTML = "✅ Сообщение отправлено! Перейдите в диалог с ботом";
             }
         }
         
-        // Отправка заметки
         function sendNote() {
-            var note = prompt("Введите текст заметки:");
+            var note = prompt("Введите заметку:");
             if (note) {
-                sendMessageToVK("заметка " + note).then(function() {
-                    updateStatus("✅ Заметка отправлена!");
-                    setTimeout(function() {
-                        updateStatus("✅ Приложение готово");
-                    }, 2000);
-                }).catch(function(e) {
-                    alert("Заметка скопирована: " + note);
-                });
+                window.open("https://vk.com/im?sel=" + GROUP_ID + "&msg=" + encodeURIComponent("заметка " + note), "_blank");
+                document.getElementById("info").innerHTML = "✅ Заметка отправлена!";
             }
         }
         
-        // Запрос погоды
         function sendWeather() {
             var city = prompt("Введите город:", "Москва");
             if (city) {
-                sendMessageToVK("погода " + city).then(function() {
-                    updateStatus("🌤 Запрос погоды отправлен!");
-                    setTimeout(function() {
-                        updateStatus("✅ Приложение готово");
-                    }, 2000);
-                }).catch(function(e) {
-                    alert("Запрос скопирован: погода " + city);
-                });
+                window.open("https://vk.com/im?sel=" + GROUP_ID + "&msg=" + encodeURIComponent("погода " + city), "_blank");
+                document.getElementById("info").innerHTML = "🌤 Запрос погоды отправлен!";
             }
         }
         
-        // Закрытие приложения
-        function closeApp() {
-            if (window.VK && VK.callMethod) {
-                VK.callMethod("VKWebAppClose", {"status": "success"});
-            } else {
-                window.close();
-            }
+        // Получаем ID пользователя из URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var vkUserId = urlParams.get('vk_user_id');
+        if (vkUserId) {
+            document.getElementById("info").innerHTML = "👤 Ваш ID: " + vkUserId + "<br>Нажмите кнопку, чтобы написать боту";
         }
-        
-        // Запуск приложения
-        initApp();
-        
-        // Выводим ID сообщества для отладки
-        console.log("App ID:", APP_ID);
-        console.log("VK доступен:", !!window.VK);
     </script>
 </body>
 </html>
