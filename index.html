@@ -24,6 +24,7 @@
             text-align: center;
             color: #333;
             margin-bottom: 20px;
+            font-size: 24px;
         }
         button {
             width: 100%;
@@ -34,13 +35,23 @@
             font-size: 16px;
             cursor: pointer;
             transition: transform 0.2s;
+            font-weight: 500;
         }
         button:active {
             transform: scale(0.98);
         }
-        .btn-primary { background: #667eea; color: white; }
-        .btn-secondary { background: #48bb78; color: white; }
-        .btn-info { background: #4299e1; color: white; }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+        .btn-info {
+            background: #4299e1;
+            color: white;
+        }
         .info {
             background: #f7fafc;
             padding: 15px;
@@ -48,6 +59,7 @@
             margin-top: 20px;
             text-align: center;
             font-size: 14px;
+            color: #4a5568;
         }
         .status {
             background: #e6fffa;
@@ -56,6 +68,34 @@
             margin-top: 15px;
             text-align: center;
             font-size: 13px;
+            color: #234e52;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .message-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .message-input input {
+            flex: 1;
+            margin: 0;
+        }
+        .message-input button {
+            width: auto;
+            margin: 0;
+            padding: 12px 20px;
         }
     </style>
 </head>
@@ -63,68 +103,97 @@
     <div class="container">
         <h1>📱 VK Bot Helper</h1>
         
-        <button class="btn-primary" onclick="sendToBot()">💬 Написать боту</button>
+        <div class="message-input">
+            <input type="text" id="customMessage" placeholder="Введите сообщение...">
+            <button class="btn-primary" onclick="sendCustomMessage()">📤 Отправить</button>
+        </div>
+        
         <button class="btn-secondary" onclick="sendNote()">📝 Отправить заметку</button>
         <button class="btn-info" onclick="sendWeather()">🌤 Узнать погоду</button>
         
         <div class="info" id="info">
-            👋 Нажмите на кнопку
+            💡 Нажмите на кнопку, чтобы отправить сообщение боту
         </div>
         <div class="status" id="status">
-            ✅ Готово
+            ✅ Приложение готово
         </div>
     </div>
     
     <script>
         // ⚠️ ЗАМЕНИТЕ НА ID ВАШЕГО СООБЩЕСТВА ⚠️
-        var GROUP_ID = "-54495928";  // Например: "-123456789"
+        // Как получить: https://vk.com/clubXXXXX → ID = -XXXXX
+        var GROUP_ID = "-217249761";  // ← ВСТАВЬТЕ СВОЙ ID С МИНУСОМ!
         
-        function openDialog(message) {
+        // Функция отправки сообщения
+        function sendMessage(message) {
+            if (!message || !message.trim()) {
+                alert("Введите сообщение!");
+                return false;
+            }
+            
+            // Формируем ссылку на диалог с ботом
             var url = "https://vk.com/im?sel=" + GROUP_ID + "&msg=" + encodeURIComponent(message);
+            
+            // Открываем в новой вкладке
             window.open(url, "_blank");
+            
+            // Обновляем статус
+            var statusDiv = document.getElementById("status");
+            statusDiv.innerHTML = "✅ Сообщение отправлено! Перейдите в диалог с ботом";
+            statusDiv.style.background = "#c6f6d5";
+            
+            setTimeout(function() {
+                statusDiv.innerHTML = "✅ Приложение готово";
+                statusDiv.style.background = "#e6fffa";
+            }, 3000);
+            
+            return true;
         }
         
-        function sendToBot() {
-            var msg = prompt("Введите сообщение:", "привет");
-            if (msg && msg.trim()) {
-                openDialog(msg);
-                document.getElementById("status").innerHTML = "✅ Отправлено!";
-                setTimeout(() => {
-                    document.getElementById("status").innerHTML = "✅ Готово";
-                }, 2000);
+        // Отправка своего сообщения
+        function sendCustomMessage() {
+            var input = document.getElementById("customMessage");
+            var message = input.value;
+            if (sendMessage(message)) {
+                input.value = "";
             }
         }
         
+        // Отправка заметки
         function sendNote() {
-            var note = prompt("Введите заметку:");
+            var note = prompt("📝 Введите текст заметки:", "Купить продукты");
             if (note && note.trim()) {
-                openDialog("заметка " + note);
-                document.getElementById("status").innerHTML = "✅ Заметка отправлена!";
-                setTimeout(() => {
-                    document.getElementById("status").innerHTML = "✅ Готово";
-                }, 2000);
+                sendMessage("заметка " + note);
             }
         }
         
+        // Запрос погоды
         function sendWeather() {
-            var city = prompt("Введите город:", "Москва");
+            var city = prompt("🌤 Введите город:", "Москва");
             if (city && city.trim()) {
-                openDialog("погода " + city);
-                document.getElementById("status").innerHTML = "🌤 Запрос отправлен!";
-                setTimeout(() => {
-                    document.getElementById("status").innerHTML = "✅ Готово";
-                }, 2000);
+                sendMessage("погода " + city);
             }
         }
         
-        // Показываем ID пользователя
+        // Получаем ID пользователя из URL (если есть)
         var urlParams = new URLSearchParams(window.location.search);
         var vkUserId = urlParams.get('vk_user_id');
+        var vkAppId = urlParams.get('vk_app_id');
+        
         if (vkUserId) {
-            document.getElementById("info").innerHTML = "👤 Ваш ID: " + vkUserId;
+            document.getElementById("info").innerHTML = "👤 Ваш VK ID: " + vkUserId + "<br>🤖 Бот ответит вам в сообщениях";
         }
         
-        console.log("App ID: 54495928, Group ID:", GROUP_ID);
+        if (vkAppId) {
+            console.log("App ID из URL:", vkAppId);
+        }
+        
+        console.log("Mini App загружен. ID сообщества:", GROUP_ID);
+        
+        // Проверка, что приложение открыто в VK
+        if (window.location.href.includes("vk.com")) {
+            document.getElementById("status").innerHTML = "✅ Приложение работает в VK!";
+        }
     </script>
 </body>
 </html>
