@@ -52,6 +52,10 @@
             background: #4299e1;
             color: white;
         }
+        .btn-link {
+            background: #edf2f7;
+            color: #4a5568;
+        }
         .info {
             background: #f7fafc;
             padding: 15px;
@@ -97,23 +101,28 @@
             margin: 0;
             padding: 12px 20px;
         }
-        .warning {
-            background: #fefcbf;
-            color: #975a16;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+        .link-box {
+            background: #f7fafc;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 15px;
+            word-break: break-all;
             font-size: 12px;
             text-align: center;
+        }
+        .copy-btn {
+            background: #48bb78;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-top: 10px;
+            width: auto;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="warning">
-            ⚠️ Игнорируйте сообщение "Приложение не инициализировано" - это ошибка VK, приложение работает!
-        </div>
-        
         <h1>📱 VK Bot Helper</h1>
         
         <div class="message-input">
@@ -123,6 +132,14 @@
         
         <button class="btn-secondary" onclick="sendNote()">📝 Отправить заметку</button>
         <button class="btn-info" onclick="sendWeather()">🌤 Узнать погоду</button>
+        
+        <div class="link-box" id="linkBox">
+            🔗 Ссылка для отправки сообщения:
+            <div style="margin-top: 8px;">
+                <code id="messageLink" style="font-size: 11px;">...</code>
+            </div>
+            <button class="copy-btn" onclick="copyLink()">📋 Скопировать ссылку</button>
+        </div>
         
         <div class="info" id="info">
             💡 Нажмите на кнопку, чтобы отправить сообщение боту
@@ -135,6 +152,7 @@
     <script>
         // ID вашего сообщества
         var GROUP_ID = "-236570950";
+        var currentMessage = "";
         
         // Функция отправки сообщения
         function sendMessage(message) {
@@ -143,23 +161,50 @@
                 return false;
             }
             
-            // Формируем ссылку на диалог с ботом
-            var url = "https://vk.com/im?sel=" + GROUP_ID + "&msg=" + encodeURIComponent(message);
+            currentMessage = message;
             
-            // Открываем в новой вкладке
+            // Формируем ссылку на диалог с ботом
+            var url = "https://vk.com/im?sel=" + GROUP_ID;
+            
+            // Показываем ссылку для копирования
+            var fullUrl = url + "&msg=" + encodeURIComponent(message);
+            document.getElementById("messageLink").innerHTML = fullUrl;
+            
+            // Открываем диалог (без автоматического сообщения, так как VK блокирует)
             window.open(url, "_blank");
             
-            // Обновляем статус
+            // Обновляем статус с инструкцией
             var statusDiv = document.getElementById("status");
-            statusDiv.innerHTML = "✅ Сообщение отправлено! Перейдите в диалог с ботом";
-            statusDiv.style.background = "#c6f6d5";
+            statusDiv.innerHTML = "📋 Диалог открыт! Скопируйте ссылку выше и вставьте сообщение вручную, или нажмите 'Скопировать ссылку' и вставьте в адресную строку";
+            statusDiv.style.background = "#fefcbf";
+            
+            // Копируем полную ссылку в буфер
+            copyToClipboard(fullUrl);
             
             setTimeout(function() {
-                statusDiv.innerHTML = "✅ Приложение готово";
-                statusDiv.style.background = "#e6fffa";
-            }, 3000);
+                statusDiv.innerHTML = "✅ Диалог открыт! Вставьте сообщение из буфера обмена (Ctrl+V) в поле ввода диалога";
+                statusDiv.style.background = "#c6f6d5";
+            }, 2000);
             
             return true;
+        }
+        
+        // Копирование в буфер
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                console.log("Ссылка скопирована:", text);
+            });
+        }
+        
+        function copyLink() {
+            var link = document.getElementById("messageLink").innerHTML;
+            copyToClipboard(link);
+            var statusDiv = document.getElementById("status");
+            statusDiv.innerHTML = "✅ Ссылка скопирована! Вставьте её в адресную строку браузера (Ctrl+V) и нажмите Enter";
+            statusDiv.style.background = "#c6f6d5";
+            setTimeout(function() {
+                statusDiv.innerHTML = "✅ Приложение готово";
+            }, 3000);
         }
         
         function sendCustomMessage() {
@@ -188,8 +233,10 @@
         var urlParams = new URLSearchParams(window.location.search);
         var vkUserId = urlParams.get('vk_user_id');
         if (vkUserId) {
-            document.getElementById("info").innerHTML = "👤 Ваш VK ID: " + vkUserId + "<br>🤖 Бот ответит вам в сообщениях";
+            document.getElementById("info").innerHTML = "👤 Ваш VK ID: " + vkUserId + "<br>🤖 ID бота: " + GROUP_ID;
         }
+        
+        console.log("Mini App загружен. ID сообщества:", GROUP_ID);
     </script>
 </body>
 </html>
