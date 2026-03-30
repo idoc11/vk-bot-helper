@@ -1,358 +1,82 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VK Bot Mini App</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        
-        .note-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .note-input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        .note-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .add-btn {
-            padding: 12px 24px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-        
-        .add-btn:hover {
-            background: #5a67d8;
-        }
-        
-        .notes-list {
-            list-style: none;
-        }
-        
-        .note-item {
-            background: #f7fafc;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .note-text {
-            flex: 1;
-            color: #2d3748;
-        }
-        
-        .delete-btn {
-            background: #fc8181;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background 0.3s;
-        }
-        
-        .delete-btn:hover {
-            background: #f56565;
-        }
-        
-        .weather-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-        }
-        
-        .weather-temp {
-            font-size: 48px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .stat-card {
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .stat-label {
-            color: #718096;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        
-        .close-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-        
-        .close-btn:hover {
-            background: rgba(0,0,0,0.7);
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                margin: 0;
-                border-radius: 0;
-            }
-            
-            .note-form {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <title>VK Mini App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <script src="https://vk.com/js/api/openapi.js?169"></script>
 </head>
 <body>
-    <button class="close-btn" onclick="closeApp()">✕</button>
-    
-    <div class="container">
-        <h1>📝 VK Bot Заметки</h1>
-        
-        <div class="note-form">
-            <input type="text" id="noteInput" class="note-input" placeholder="Введите заметку...">
-            <button class="add-btn" onclick="addNote()">➕ Добавить</button>
-        </div>
-        
-        <ul id="notesList" class="notes-list"></ul>
-        
-        <div class="weather-card" id="weatherCard">
-            <div style="text-align: center;">
-                <div>🌤 Погода в вашем городе</div>
-                <div class="weather-temp" id="weatherTemp">--°C</div>
-                <div id="weatherDesc">Загрузка...</div>
-            </div>
-        </div>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-value" id="notesCount">0</div>
-                <div class="stat-label">Всего заметок</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="userId">-</div>
-                <div class="stat-label">Ваш ID</div>
-            </div>
-        </div>
+    <h1 style="text-align: center; margin-top: 50px;">📱 VK Bot Helper</h1>
+    <p id="status" style="text-align: center; padding: 20px; font-size: 16px;">Загрузка...</p>
+    <div style="text-align: center;">
+        <button onclick="sendTest()" style="margin: 10px; padding: 10px 20px; font-size: 16px;">💬 Тест</button>
+        <button onclick="closeApp()" style="margin: 10px; padding: 10px 20px; font-size: 16px;">❌ Закрыть</button>
     </div>
     
-    <script src="https://vk.com/js/api/openapi.js?169"></script>
     <script>
-        let notes = [];
+        // ВАЖНО: Укажите ID вашего Mini App
+        var APP_ID = 54495928;  // Ваш ID приложения
         
-        // Инициализация VK Mini App
-        VK.init(function() {
-            console.log('VK Mini App initialized');
-        }, function(error) {
-            console.error('VK init error:', error);
+        // Функция для отображения статуса
+        function setStatus(text, isError) {
+            var statusDiv = document.getElementById("status");
+            statusDiv.innerHTML = text;
+            if (isError) {
+                statusDiv.style.color = "red";
+            } else {
+                statusDiv.style.color = "green";
+            }
+        }
+        
+        setStatus("⏳ Инициализация VK (App ID: " + APP_ID + ")...", false);
+        
+        // Инициализация VK с указанием APP_ID
+        VK.init({
+            apiId: APP_ID
         });
         
-        // Получение информации о пользователе
-        VK.callMethod('VKWebAppGetUserInfo', {}, function(data) {
-            if (data && data.id) {
-                document.getElementById('userId').textContent = data.id;
-                // Получаем погоду для города пользователя
-                if (data.city && data.city.title) {
-                    getWeather(data.city.title);
+        // Ждем готовности VK
+        VK.ready(function() {
+            setStatus("✅ VK инициализирован!", false);
+            
+            // Получаем информацию о пользователе
+            VK.callMethod("VKWebAppGetUserInfo", {}, function(data) {
+                console.log("Данные пользователя:", data);
+                if (data && data.id) {
+                    setStatus("✅ Приложение работает!<br>👤 Ваш ID: " + data.id + "<br>👋 Привет, " + data.first_name, false);
+                } else {
+                    setStatus("⚠️ Не удалось получить данные пользователя", true);
                 }
-            }
+            });
+            
+            // Получаем параметры запуска
+            VK.callMethod("VKWebAppGetLaunchParams", {}, function(params) {
+                console.log("Параметры запуска:", params);
+            });
         });
         
-        // Функция для получения погоды через API бота
-        function getWeather(city) {
-            // Здесь можно сделать запрос к вашему API
-            // Пока показываем тестовые данные
-            setTimeout(() => {
-                document.getElementById('weatherTemp').textContent = '22°C';
-                document.getElementById('weatherDesc').textContent = '☀️ Ясно, ветер 3 м/с';
-            }, 500);
-        }
-        
-        // Загрузка заметок
-        function loadNotes() {
-            const saved = localStorage.getItem('vk_notes');
-            if (saved) {
-                notes = JSON.parse(saved);
-                renderNotes();
-            }
-        }
-        
-        // Сохранение заметок
-        function saveNotes() {
-            localStorage.setItem('vk_notes', JSON.stringify(notes));
-            updateStats();
-        }
-        
-        // Добавление заметки
-        function addNote() {
-            const input = document.getElementById('noteInput');
-            const text = input.value.trim();
-            
-            if (text) {
-                notes.unshift({
-                    id: Date.now(),
-                    text: text,
-                    date: new Date().toLocaleString()
-                });
-                saveNotes();
-                renderNotes();
-                input.value = '';
-                
-                // Отправляем заметку в бот
-                VK.callMethod('VKWebAppSendMessage', {
-                    'message': `Добавлена заметка: ${text}`
+        // Функция отправки тестового сообщения
+        function sendTest() {
+            var message = prompt("Введите сообщение для бота:", "привет");
+            if (message) {
+                VK.callMethod("VKWebAppSendMessage", {
+                    "message": message
+                }, function(result) {
+                    console.log("Результат отправки:", result);
+                    alert("✅ Сообщение отправлено боту!");
                 });
             }
         }
         
-        // Удаление заметки
-        function deleteNote(id) {
-            notes = notes.filter(note => note.id !== id);
-            saveNotes();
-            renderNotes();
-        }
-
-        // Отправка данных в бот
-function sendToBot(message) {
-    VK.callMethod('VKWebAppSendMessage', {
-        'message': message,
-        'user_id': VK.userId
-    });
-}
-
-// Пример использования
-sendToBot('Новая заметка создана в Mini App');
-        
-        // Отображение заметок
-        function renderNotes() {
-            const list = document.getElementById('notesList');
-            const notesCount = document.getElementById('notesCount');
-            
-            if (notes.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: #a0aec0; padding: 40px;">📭 Нет заметок</div>';
-                notesCount.textContent = '0';
-                return;
-            }
-            
-            notesCount.textContent = notes.length;
-            list.innerHTML = notes.map(note => `
-                <li class="note-item">
-                    <div class="note-text">
-                        <strong>${escapeHtml(note.text)}</strong><br>
-                        <small style="color: #a0aec0;">${note.date}</small>
-                    </div>
-                    <button class="delete-btn" onclick="deleteNote(${note.id})">🗑</button>
-                </li>
-            `).join('');
-        }
-        
-        // Функция для экранирования HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        // Обновление статистики
-        function updateStats() {
-            const notesCount = document.getElementById('notesCount');
-            notesCount.textContent = notes.length;
-        }
-        
-        // Закрытие Mini App
+        // Функция закрытия приложения
         function closeApp() {
-            VK.callMethod('VKWebAppClose', {'status': 'success'});
+            VK.callMethod("VKWebAppClose", {"status": "success"});
         }
         
-        // Загрузка приложения
-        loadNotes();
-        
-        // Отправляем событие открытия приложения в бот
-        VK.callMethod('VKWebAppSendMessage', {
-            'message': 'Mini App открыт!'
+        // Обработка ошибок
+        window.addEventListener('error', function(e) {
+            console.error("Ошибка:", e.message);
         });
     </script>
 </body>
