@@ -97,10 +97,23 @@
             margin: 0;
             padding: 12px 20px;
         }
+        .warning {
+            background: #fefcbf;
+            color: #975a16;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="warning">
+            ⚠️ Игнорируйте сообщение "Приложение не инициализировано" - это ошибка VK, приложение работает!
+        </div>
+        
         <h1>📱 VK Bot Helper</h1>
         
         <div class="message-input">
@@ -120,19 +133,13 @@
     </div>
     
     <script>
-        // ⚠️ ВСТАВЬТЕ СЮДА ID ВАШЕГО СООБЩЕСТВА С МИНУСОМ! ⚠️
-        // Пример: var GROUP_ID = "-236570950";
-        var GROUP_ID = "-236570950";  // ← ЗАМЕНИТЕ НА ПРАВИЛЬНЫЙ ID!
+        // ID вашего сообщества
+        var GROUP_ID = "-236570950";
         
         // Функция отправки сообщения
         function sendMessage(message) {
             if (!message || !message.trim()) {
                 alert("Введите сообщение!");
-                return false;
-            }
-            
-            if (GROUP_ID === "YOUR_GROUP_ID_HERE") {
-                alert("⚠️ ID сообщества не настроен!\n\nЗамените YOUR_GROUP_ID_HERE на ID вашего сообщества (например: -123456789)");
                 return false;
             }
             
@@ -155,7 +162,6 @@
             return true;
         }
         
-        // Отправка своего сообщения
         function sendCustomMessage() {
             var input = document.getElementById("customMessage");
             var message = input.value;
@@ -164,7 +170,6 @@
             }
         }
         
-        // Отправка заметки
         function sendNote() {
             var note = prompt("📝 Введите текст заметки:", "Купить продукты");
             if (note && note.trim()) {
@@ -172,7 +177,6 @@
             }
         }
         
-        // Запрос погоды
         function sendWeather() {
             var city = prompt("🌤 Введите город:", "Москва");
             if (city && city.trim()) {
@@ -180,16 +184,12 @@
             }
         }
         
-        // Получаем ID пользователя из URL (если есть)
+        // Показываем ID пользователя
         var urlParams = new URLSearchParams(window.location.search);
         var vkUserId = urlParams.get('vk_user_id');
-        var vkAppId = urlParams.get('vk_app_id');
-        
         if (vkUserId) {
             document.getElementById("info").innerHTML = "👤 Ваш VK ID: " + vkUserId + "<br>🤖 Бот ответит вам в сообщениях";
         }
-        
-        console.log("Mini App загружен");
     </script>
 </body>
 </html>
