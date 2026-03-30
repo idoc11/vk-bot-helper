@@ -24,7 +24,6 @@
             text-align: center;
             color: #333;
             margin-bottom: 20px;
-            font-size: 24px;
         }
         button {
             width: 100%;
@@ -33,25 +32,15 @@
             border: none;
             border-radius: 10px;
             font-size: 16px;
-            font-weight: 500;
             cursor: pointer;
             transition: transform 0.2s;
         }
         button:active {
             transform: scale(0.98);
         }
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        .btn-secondary {
-            background: #48bb78;
-            color: white;
-        }
-        .btn-info {
-            background: #4299e1;
-            color: white;
-        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-secondary { background: #48bb78; color: white; }
+        .btn-info { background: #4299e1; color: white; }
         .info {
             background: #f7fafc;
             padding: 15px;
@@ -59,7 +48,6 @@
             margin-top: 20px;
             text-align: center;
             font-size: 14px;
-            color: #4a5568;
         }
         .status {
             background: #e6fffa;
@@ -68,7 +56,6 @@
             margin-top: 15px;
             text-align: center;
             font-size: 13px;
-            color: #234e52;
         }
     </style>
 </head>
@@ -81,68 +68,63 @@
         <button class="btn-info" onclick="sendWeather()">🌤 Узнать погоду</button>
         
         <div class="info" id="info">
-            👋 Нажмите на кнопку, чтобы начать общение с ботом
+            👋 Нажмите на кнопку
         </div>
         <div class="status" id="status">
-            ✅ Приложение готово
+            ✅ Готово
         </div>
     </div>
     
     <script>
-        // ID вашего сообщества (ЗАМЕНИТЕ НА СВОЙ!)
-        // Как получить: https://vk.com/clubXXXXX → ID = -XXXXX
-        var GROUP_ID = "-54495928";  // ← ЗАМЕНИТЕ ЭТО НА ID ВАШЕГО СООБЩЕСТВА
+        // ⚠️ ЗАМЕНИТЕ НА ID ВАШЕГО СООБЩЕСТВА ⚠️
+        var GROUP_ID = "-54495928";  // Например: "-123456789"
         
-        // Функция для открытия диалога с ботом
         function openDialog(message) {
             var url = "https://vk.com/im?sel=" + GROUP_ID + "&msg=" + encodeURIComponent(message);
             window.open(url, "_blank");
         }
         
-        // Отправка сообщения боту
         function sendToBot() {
-            var msg = prompt("Введите сообщение для бота:", "привет");
+            var msg = prompt("Введите сообщение:", "привет");
             if (msg && msg.trim()) {
                 openDialog(msg);
-                document.getElementById("status").innerHTML = "✅ Сообщение отправлено! Перейдите в диалог с ботом";
-                setTimeout(function() {
-                    document.getElementById("status").innerHTML = "✅ Приложение готово";
-                }, 3000);
+                document.getElementById("status").innerHTML = "✅ Отправлено!";
+                setTimeout(() => {
+                    document.getElementById("status").innerHTML = "✅ Готово";
+                }, 2000);
             }
         }
         
-        // Отправка заметки
         function sendNote() {
-            var note = prompt("Введите текст заметки:", "");
+            var note = prompt("Введите заметку:");
             if (note && note.trim()) {
                 openDialog("заметка " + note);
-                document.getElementById("status").innerHTML = "✅ Заметка отправлена боту!";
-                setTimeout(function() {
-                    document.getElementById("status").innerHTML = "✅ Приложение готово";
-                }, 3000);
+                document.getElementById("status").innerHTML = "✅ Заметка отправлена!";
+                setTimeout(() => {
+                    document.getElementById("status").innerHTML = "✅ Готово";
+                }, 2000);
             }
         }
         
-        // Запрос погоды
         function sendWeather() {
             var city = prompt("Введите город:", "Москва");
             if (city && city.trim()) {
                 openDialog("погода " + city);
-                document.getElementById("status").innerHTML = "🌤 Запрос погоды отправлен боту!";
-                setTimeout(function() {
-                    document.getElementById("status").innerHTML = "✅ Приложение готово";
-                }, 3000);
+                document.getElementById("status").innerHTML = "🌤 Запрос отправлен!";
+                setTimeout(() => {
+                    document.getElementById("status").innerHTML = "✅ Готово";
+                }, 2000);
             }
         }
         
-        // Показываем ID пользователя из URL (если есть)
+        // Показываем ID пользователя
         var urlParams = new URLSearchParams(window.location.search);
         var vkUserId = urlParams.get('vk_user_id');
         if (vkUserId) {
-            document.getElementById("info").innerHTML = "👤 Ваш VK ID: " + vkUserId + "<br>🤖 Бот ответит вам в сообщениях";
+            document.getElementById("info").innerHTML = "👤 Ваш ID: " + vkUserId;
         }
         
-        console.log("Mini App загружен. GROUP_ID:", GROUP_ID);
+        console.log("App ID: 54495928, Group ID:", GROUP_ID);
     </script>
 </body>
 </html>
