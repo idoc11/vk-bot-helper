@@ -120,14 +120,19 @@
     </div>
     
     <script>
-        // ⚠️ ЗАМЕНИТЕ НА ID ВАШЕГО СООБЩЕСТВА ⚠️
-        // Как получить: https://vk.com/clubXXXXX → ID = -XXXXX
-        var GROUP_ID = "-236570950";  // ← ВСТАВЬТЕ СВОЙ ID С МИНУСОМ!
+        // ⚠️ ВСТАВЬТЕ СЮДА ID ВАШЕГО СООБЩЕСТВА С МИНУСОМ! ⚠️
+        // Пример: var GROUP_ID = "-236570950";
+        var GROUP_ID = "-236570950";  // ← ЗАМЕНИТЕ НА ПРАВИЛЬНЫЙ ID!
         
         // Функция отправки сообщения
         function sendMessage(message) {
             if (!message || !message.trim()) {
                 alert("Введите сообщение!");
+                return false;
+            }
+            
+            if (GROUP_ID === "YOUR_GROUP_ID_HERE") {
+                alert("⚠️ ID сообщества не настроен!\n\nЗамените YOUR_GROUP_ID_HERE на ID вашего сообщества (например: -123456789)");
                 return false;
             }
             
@@ -184,16 +189,7 @@
             document.getElementById("info").innerHTML = "👤 Ваш VK ID: " + vkUserId + "<br>🤖 Бот ответит вам в сообщениях";
         }
         
-        if (vkAppId) {
-            console.log("App ID из URL:", vkAppId);
-        }
-        
-        console.log("Mini App загружен. ID сообщества:", GROUP_ID);
-        
-        // Проверка, что приложение открыто в VK
-        if (window.location.href.includes("vk.com")) {
-            document.getElementById("status").innerHTML = "✅ Приложение работает в VK!";
-        }
+        console.log("Mini App загружен");
     </script>
 </body>
 </html>
