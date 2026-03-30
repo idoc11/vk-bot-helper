@@ -3,81 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <title>VK Mini App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://vk.com/js/api/openapi.js?169"></script>
 </head>
 <body>
     <h1 style="text-align: center; margin-top: 50px;">📱 VK Bot Helper</h1>
-    <p id="status" style="text-align: center; padding: 20px; font-size: 16px;">Загрузка...</p>
+    <p id="status" style="text-align: center; padding: 20px;">Загрузка...</p>
     <div style="text-align: center;">
-        <button onclick="sendTest()" style="margin: 10px; padding: 10px 20px; font-size: 16px;">💬 Тест</button>
-        <button onclick="closeApp()" style="margin: 10px; padding: 10px 20px; font-size: 16px;">❌ Закрыть</button>
+        <button onclick="sendMessage()">💬 Отправить сообщение</button>
+        <button onclick="closeApp()">❌ Закрыть</button>
     </div>
     
     <script>
-        // ВАЖНО: Укажите ID вашего Mini App
-        var APP_ID = 54495928;  // Ваш ID приложения
+        var statusDiv = document.getElementById("status");
         
-        // Функция для отображения статуса
-        function setStatus(text, isError) {
-            var statusDiv = document.getElementById("status");
-            statusDiv.innerHTML = text;
-            if (isError) {
-                statusDiv.style.color = "red";
-            } else {
-                statusDiv.style.color = "green";
+        // Функция отправки сообщения
+        function sendMessage() {
+            var msg = prompt("Введите сообщение:", "привет");
+            if (msg) {
+                VK.callMethod("VKWebAppSendMessage", {"message": msg});
+                statusDiv.innerHTML = "✅ Сообщение отправлено!";
+                setTimeout(function() {
+                    statusDiv.innerHTML = "Готово к работе";
+                }, 2000);
             }
         }
         
-        setStatus("⏳ Инициализация VK (App ID: " + APP_ID + ")...", false);
-        
-        // Инициализация VK с указанием APP_ID
-        VK.init({
-            apiId: APP_ID
-        });
-        
-        // Ждем готовности VK
-        VK.ready(function() {
-            setStatus("✅ VK инициализирован!", false);
-            
-            // Получаем информацию о пользователе
-            VK.callMethod("VKWebAppGetUserInfo", {}, function(data) {
-                console.log("Данные пользователя:", data);
-                if (data && data.id) {
-                    setStatus("✅ Приложение работает!<br>👤 Ваш ID: " + data.id + "<br>👋 Привет, " + data.first_name, false);
-                } else {
-                    setStatus("⚠️ Не удалось получить данные пользователя", true);
-                }
-            });
-            
-            // Получаем параметры запуска
-            VK.callMethod("VKWebAppGetLaunchParams", {}, function(params) {
-                console.log("Параметры запуска:", params);
-            });
-        });
-        
-        // Функция отправки тестового сообщения
-        function sendTest() {
-            var message = prompt("Введите сообщение для бота:", "привет");
-            if (message) {
-                VK.callMethod("VKWebAppSendMessage", {
-                    "message": message
-                }, function(result) {
-                    console.log("Результат отправки:", result);
-                    alert("✅ Сообщение отправлено боту!");
-                });
-            }
-        }
-        
-        // Функция закрытия приложения
+        // Закрытие приложения
         function closeApp() {
             VK.callMethod("VKWebAppClose", {"status": "success"});
         }
         
-        // Обработка ошибок
-        window.addEventListener('error', function(e) {
-            console.error("Ошибка:", e.message);
+        // Получаем данные пользователя
+        VK.callMethod("VKWebAppGetUserInfo", {}, function(data) {
+            if (data && data.id) {
+                statusDiv.innerHTML = "✅ Приложение работает!<br>👤 Ваш ID: " + data.id;
+            }
         });
+        
+        statusDiv.innerHTML = "✅ Приложение готово к работе!";
     </script>
 </body>
 </html>
