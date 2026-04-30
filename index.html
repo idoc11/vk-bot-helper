@@ -3,273 +3,450 @@
 <head>
     <meta charset="UTF-8">
     <title>Bot Helper</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            margin: 0;
             padding: 20px;
+            -webkit-tap-highlight-color: transparent;
         }
+        
         .container {
             max-width: 500px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
+        
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 20px;
-            font-size: 24px;
+            margin-bottom: 25px;
+            font-size: 28px;
         }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+            height: 80px;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
         button {
             width: 100%;
-            padding: 15px;
-            margin: 10px 0;
+            padding: 14px;
+            margin: 8px 0;
             border: none;
             border-radius: 10px;
             font-size: 16px;
             cursor: pointer;
-            transition: transform 0.2s;
-            font-weight: 500;
+            transition: all 0.3s;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
         }
+        
         button:active {
             transform: scale(0.98);
         }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         .btn-primary {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
+        
         .btn-secondary {
-            background: #48bb78;
+            background: linear-gradient(135deg, #48bb78, #38a169);
             color: white;
         }
+        
         .btn-info {
-            background: #4299e1;
+            background: linear-gradient(135deg, #4299e1, #3182ce);
             color: white;
         }
-        .btn-link {
-            background: #edf2f7;
-            color: #4a5568;
-        }
-        .info {
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            text-align: center;
-            font-size: 14px;
-            color: #4a5568;
-        }
-        .status {
-            background: #e6fffa;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 15px;
-            text-align: center;
-            font-size: 13px;
-            color: #234e52;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .message-input {
-            display: flex;
+        
+        .quick-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .quick-buttons button {
+            margin: 0;
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 10px;
             margin-top: 15px;
-        }
-        .message-input input {
-            flex: 1;
-            margin: 0;
-        }
-        .message-input button {
-            width: auto;
-            margin: 0;
-            padding: 12px 20px;
-        }
-        .message-preview {
-            background: #edf2f7;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
+            text-align: center;
             font-size: 14px;
-            color: #2d3748;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .status-info {
+            background: #bee3f8;
+            color: #2a4365;
+        }
+        
+        .status-loading {
+            background: #fefcbf;
+            color: #744210;
+        }
+        
+        .history {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .history-item {
+            padding: 8px 12px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .init-status {
+            background: #f0fff4;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #22543d;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Bot Helper</h1>
+        <h1>🤖 Bot Helper</h1>
         
-        <div class="message-input">
-            <input type="text" id="customMessage" placeholder="Введите сообщение...">
-            <button class="btn-primary" onclick="sendCustomMessage()">📤 Отправить</button>
+        <div class="init-status" id="initStatus">
+            ⏳ Инициализация VK Bridge...
         </div>
         
-        <button class="btn-secondary" onclick="sendNote()">📝 Отправить заметку</button>
-        <button class="btn-info" onclick="sendWeather()">🌤 Узнать погоду</button>
-        
-        <div class="message-preview" id="messagePreview" style="display: none;"></div>
-        
-        <div class="info" id="info">
-            💡 Нажмите на кнопку, чтобы отправить сообщение боту
+        <div class="form-group">
+            <textarea id="messageInput" placeholder="Введите сообщение для бота..."></textarea>
         </div>
-        <div class="status" id="status">
-            ✅ Приложение готово
+        
+        <button class="btn-primary" onclick="sendMessage()" id="sendBtn">
+            📤 Отправить сообщение
+        </button>
+        
+        <div class="quick-buttons">
+            <button class="btn-secondary" onclick="quickMessage('заметка Купить продукты')">
+                📝 Заметка
+            </button>
+            <button class="btn-info" onclick="quickMessage('погода Москва')">
+                🌤 Погода
+            </button>
+        </div>
+        
+        <div class="status status-info" id="status">
+            ✅ Бот готов к работе
+        </div>
+        
+        <div class="history" id="history" style="display: none;">
+            <strong>📋 Последние сообщения:</strong>
+            <div id="historyList"></div>
         </div>
     </div>
     
+    <!-- Подключаем VK Bridge через CDN (обязательно для VK Mini Apps) -->
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+    
     <script>
-        var GROUP_ID = -236570950;
-        
-        // Инициализация VK Bridge
-        function initVK() {
-            if (typeof vkBridge !== 'undefined') {
-                vkBridge.send('VKWebAppInit', {});
+        // Инициализация VK Bridge (ОБЯЗАТЕЛЬНО для VK Mini Apps!)
+        function initVKBridge() {
+            const initStatus = document.getElementById('initStatus');
+            
+            // Проверяем, что VK Bridge загрузился
+            if (typeof vkBridge === 'undefined') {
+                initStatus.innerHTML = '❌ VK Bridge не загружен';
+                initStatus.style.background = '#fed7d7';
+                console.error('VK Bridge не загружен');
+                return;
+            }
+            
+            try {
+                // Отправляем событие инициализации
+                vkBridge.send('VKWebAppInit', {})
+                    .then(() => {
+                        initStatus.innerHTML = '✅ VK Bridge инициализирован';
+                        initStatus.style.background = '#c6f6d5';
+                        console.log('VK Bridge успешно инициализирован');
+                        
+                        // Получаем данные пользователя
+                        return vkBridge.send('VKWebAppGetUserInfo', {});
+                    })
+                    .then((userData) => {
+                        if (userData) {
+                            console.log('Данные пользователя:', userData);
+                            initStatus.innerHTML = `✅ Приложение готово | Пользователь: ${userData.first_name || 'Гость'}`;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Ошибка инициализации VK Bridge:', error);
+                        initStatus.innerHTML = '⚠️ Ошибка инициализации, но приложение работает';
+                        initStatus.style.background = '#fefcbf';
+                    });
+                    
+            } catch (error) {
+                console.error('Критическая ошибка VK Bridge:', error);
+                initStatus.innerHTML = '❌ Критическая ошибка инициализации';
+                initStatus.style.background = '#fed7d7';
             }
         }
         
-        // Отправка сообщения через VK API
-        async function sendMessageToBot(message) {
-            if (!message || !message.trim()) {
-                alert("Введите сообщение!");
-                return false;
+        // API URL (автоматически определяется)
+        const API_URL = window.location.origin;
+        let messageHistory = [];
+        
+        // Проверка соединения с сервером
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_URL}/api/status`);
+                const data = await response.json();
+                
+                if (data.has_token) {
+                    updateStatus('✅ Сервер подключен, бот готов', 'success');
+                } else {
+                    updateStatus('⚠️ Сервер работает, но токен не настроен', 'error');
+                }
+            } catch (error) {
+                updateStatus('❌ Не удалось подключиться к серверу', 'error');
+            }
+        }
+        
+        // Отправка сообщения
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) {
+                updateStatus('⚠️ Введите сообщение', 'error');
+                input.focus();
+                return;
             }
             
-            var statusDiv = document.getElementById("status");
-            var previewDiv = document.getElementById("messagePreview");
+            await sendToServer(message);
+            input.value = '';
+        }
+        
+        // Быстрая отправка
+        async function quickMessage(text) {
+            document.getElementById('messageInput').value = text;
+            await sendToServer(text);
+            document.getElementById('messageInput').value = '';
+        }
+        
+        // Отправка на сервер
+        async function sendToServer(message) {
+            const sendBtn = document.getElementById('sendBtn');
+            const messageInput = document.getElementById('messageInput');
+            
+            // Блокируем кнопки
+            sendBtn.disabled = true;
+            messageInput.disabled = true;
+            sendBtn.innerHTML = '<span class="loading-spinner"></span>Отправка...';
+            updateStatus('⏳ Отправка сообщения...', 'loading');
             
             try {
-                // Показываем превью
-                previewDiv.style.display = "block";
-                previewDiv.innerHTML = "📤 Отправка сообщения: <strong>" + message + "</strong>";
-                statusDiv.innerHTML = "⏳ Отправка сообщения...";
-                statusDiv.style.background = "#fefcbf";
+                // Получаем VK параметры если доступны
+                let userId = 'anonymous';
                 
-                // Пробуем отправить через VK Bridge
                 if (typeof vkBridge !== 'undefined') {
                     try {
-                        // Метод для открытия диалога и отправки сообщения
-                        await vkBridge.send('VKWebAppOpenWallPost', {
-                            owner_id: GROUP_ID,
-                            message: message
-                        });
-                        
-                        statusDiv.innerHTML = "✅ Сообщение успешно отправлено!";
-                        statusDiv.style.background = "#c6f6d5";
-                        return true;
-                    } catch (bridgeError) {
-                        console.log("VK Bridge не сработал:", bridgeError);
+                        const userData = await vkBridge.send('VKWebAppGetUserInfo', {});
+                        userId = userData.id || 'anonymous';
+                    } catch (e) {
+                        console.log('Не удалось получить ID пользователя');
                     }
                 }
                 
-                // Запасной вариант: открываем диалог через VK Bridge
-                if (typeof vkBridge !== 'undefined') {
-                    await vkBridge.send('VKWebAppOpenCommunity', {
-                        group_id: Math.abs(GROUP_ID)
-                    });
+                const response = await fetch(`${API_URL}/api/send-message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        user_id: userId,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStatus('✅ Сообщение успешно отправлено!', 'success');
+                    addToHistory(message);
+                    
+                    // Показываем уведомление через VK Bridge если доступно
+                    if (typeof vkBridge !== 'undefined') {
+                        try {
+                            await vkBridge.send('VKWebAppShowWallPostBox', {
+                                message: message
+                            });
+                        } catch (e) {
+                            // Игнорируем ошибку
+                        }
+                    }
                 } else {
-                    // Если VK Bridge недоступен, открываем обычную ссылку
-                    window.open('https://vk.com/im?sel=' + GROUP_ID, '_blank');
+                    updateStatus(`❌ Ошибка: ${data.error}`, 'error');
                 }
-                
-                // Копируем сообщение в буфер
-                copyToClipboard(message);
-                
-                statusDiv.innerHTML = "📋 Диалог открыт! Сообщение скопировано в буфер. Вставьте его (Ctrl+V)";
-                statusDiv.style.background = "#fefcbf";
-                
-                setTimeout(function() {
-                    statusDiv.innerHTML = "✅ Готово";
-                    statusDiv.style.background = "#e6fffa";
-                }, 5000);
-                
-                return true;
-                
             } catch (error) {
-                console.error("Ошибка отправки:", error);
-                statusDiv.innerHTML = "❌ Ошибка отправки";
-                statusDiv.style.background = "#fed7d7";
-                return false;
+                updateStatus('❌ Ошибка соединения с сервером', 'error');
+                console.error('Ошибка:', error);
+            } finally {
+                // Разблокируем кнопки
+                sendBtn.disabled = false;
+                messageInput.disabled = false;
+                sendBtn.innerHTML = '📤 Отправить сообщение';
             }
         }
         
-        // Функция копирования в буфер
-        function copyToClipboard(text) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).catch(fallbackCopy);
-            } else {
-                fallbackCopy(text);
-            }
+        // Обновление статуса
+        function updateStatus(text, type) {
+            const status = document.getElementById('status');
+            status.textContent = text;
+            status.className = `status status-${type}`;
         }
         
-        function fallbackCopy(text) {
-            var textarea = document.createElement("textarea");
-            textarea.value = text;
-            textarea.style.position = "fixed";
-            textarea.style.opacity = "0";
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand("copy");
-            document.body.removeChild(textarea);
+        // Добавление в историю
+        function addToHistory(message) {
+            messageHistory.unshift({
+                text: message,
+                time: new Date().toLocaleTimeString()
+            });
+            
+            if (messageHistory.length > 10) {
+                messageHistory.pop();
+            }
+            
+            updateHistoryDisplay();
         }
         
-        function sendCustomMessage() {
-            var input = document.getElementById("customMessage");
-            var message = input.value;
-            if (message.trim()) {
-                sendMessageToBot(message);
-                input.value = "";
+        // Обновление отображения истории
+        function updateHistoryDisplay() {
+            const historyDiv = document.getElementById('history');
+            const historyList = document.getElementById('historyList');
+            
+            if (messageHistory.length === 0) {
+                historyDiv.style.display = 'none';
+                return;
             }
-        }
-        
-        function sendNote() {
-            var note = prompt("📝 Введите текст заметки:", "Купить продукты");
-            if (note && note.trim()) {
-                sendMessageToBot("заметка " + note);
-            }
-        }
-        
-        function sendWeather() {
-            var city = prompt("🌤 Введите город:", "Москва");
-            if (city && city.trim()) {
-                sendMessageToBot("погода " + city);
-            }
+            
+            historyDiv.style.display = 'block';
+            historyList.innerHTML = messageHistory.map(item => 
+                `<div class="history-item">
+                    <small style="color: #a0aec0;">${item.time}</small><br>
+                    ${item.text}
+                </div>`
+            ).join('');
         }
         
         // Обработка Enter
-        document.getElementById("customMessage").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                sendCustomMessage();
+        document.getElementById('messageInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
             }
         });
         
-        // Инициализация
-        initVK();
+        // Запускаем инициализацию при загрузке страницы
+        window.addEventListener('DOMContentLoaded', function() {
+            // Сначала инициализируем VK Bridge
+            initVKBridge();
+            
+            // Затем проверяем соединение с сервером
+            setTimeout(checkConnection, 1500);
+        });
         
-        // Показываем информацию о пользователе
-        var urlParams = new URLSearchParams(window.location.search);
-        var vkUserId = urlParams.get('vk_user_id');
-        if (vkUserId) {
-            document.getElementById("info").innerHTML = "👤 Ваш VK ID: " + vkUserId + "<br>🤖 ID бота: " + GROUP_ID;
+        // Подписываемся на события VK Bridge
+        if (typeof vkBridge !== 'undefined') {
+            vkBridge.subscribe((event) => {
+                console.log('VK Bridge Event:', event);
+                
+                // Обработка различных событий
+                switch(event.detail.type) {
+                    case 'VKWebAppViewRestore':
+                        console.log('Приложение восстановлено');
+                        break;
+                    case 'VKWebAppViewHide':
+                        console.log('Приложение скрыто');
+                        break;
+                    case 'VKWebAppOpenWallPostBoxResult':
+                        console.log('Пост успешно опубликован');
+                        break;
+                    case 'VKWebAppOpenWallPostBoxFailed':
+                        console.error('Ошибка публикации поста');
+                        break;
+                }
+            });
         }
-        
-        console.log("Mini App загружен. ID сообщества:", GROUP_ID);
     </script>
 </body>
 </html>
