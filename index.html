@@ -119,6 +119,15 @@
             width: auto;
             display: inline-block;
         }
+        .message-preview {
+            background: #edf2f7;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #2d3748;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -132,6 +141,8 @@
         
         <button class="btn-secondary" onclick="sendNote()">📝 Отправить заметку</button>
         <button class="btn-info" onclick="sendWeather()">🌤 Узнать погоду</button>
+        
+        <div class="message-preview" id="messagePreview"></div>
         
         <div class="link-box" id="linkBox">
             🔗 Ссылка для отправки сообщения:
@@ -163,44 +174,77 @@
             
             currentMessage = message;
             
-            // Формируем ссылку на диалог с ботом
+            // Показываем сообщение для копирования
+            var previewDiv = document.getElementById("messagePreview");
+            previewDiv.style.display = "block";
+            previewDiv.innerHTML = "📤 Сообщение для отправки: <strong>" + message + "</strong>";
+            
+            // Копируем сообщение в буфер обмена
+            copyToClipboard(message);
+            
+            // Формируем ссылку на диалог с ботом (без параметра msg)
             var url = "https://vk.com/im?sel=" + GROUP_ID;
+            document.getElementById("messageLink").innerHTML = url;
             
-            // Показываем ссылку для копирования
-            var fullUrl = url + "&msg=" + encodeURIComponent(message);
-            document.getElementById("messageLink").innerHTML = fullUrl;
-            
-            // Открываем диалог (без автоматического сообщения, так как VK блокирует)
+            // Открываем диалог
             window.open(url, "_blank");
             
             // Обновляем статус с инструкцией
             var statusDiv = document.getElementById("status");
-            statusDiv.innerHTML = "📋 Диалог открыт! Скопируйте ссылку выше и вставьте сообщение вручную, или нажмите 'Скопировать ссылку' и вставьте в адресную строку";
+            statusDiv.innerHTML = "📋 Сообщение скопировано! Вставьте его в открывшемся диалоге (Ctrl+V) и нажмите Enter";
             statusDiv.style.background = "#fefcbf";
             
-            // Копируем полную ссылку в буфер
-            copyToClipboard(fullUrl);
-            
             setTimeout(function() {
-                statusDiv.innerHTML = "✅ Диалог открыт! Вставьте сообщение из буфера обмена (Ctrl+V) в поле ввода диалога";
+                statusDiv.innerHTML = "✅ Готово к следующей отправке";
                 statusDiv.style.background = "#c6f6d5";
-            }, 2000);
+            }, 5000);
             
             return true;
         }
         
-        // Копирование в буфер
+        // Копирование в буфер обмена
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(function() {
-                console.log("Ссылка скопирована:", text);
-            });
+            // Используем современный API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    console.log("Текст скопирован:", text);
+                }).catch(function(err) {
+                    console.error("Ошибка копирования:", err);
+                    // Запасной метод
+                    fallbackCopy(text);
+                });
+            } else {
+                // Запасной метод для старых браузеров
+                fallbackCopy(text);
+            }
+        }
+        
+        // Запасной метод копирования
+        function fallbackCopy(text) {
+            var textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand("copy");
+                console.log("Текст скопирован (fallback):", text);
+            } catch (err) {
+                console.error("Ошибка fallback копирования:", err);
+            }
+            document.body.removeChild(textarea);
         }
         
         function copyLink() {
             var link = document.getElementById("messageLink").innerHTML;
+            if (link === "...") {
+                alert("Сначала выберите сообщение для отправки!");
+                return;
+            }
             copyToClipboard(link);
             var statusDiv = document.getElementById("status");
-            statusDiv.innerHTML = "✅ Ссылка скопирована! Вставьте её в адресную строку браузера (Ctrl+V) и нажмите Enter";
+            statusDiv.innerHTML = "✅ Ссылка на диалог скопирована!";
             statusDiv.style.background = "#c6f6d5";
             setTimeout(function() {
                 statusDiv.innerHTML = "✅ Приложение готово";
@@ -228,6 +272,13 @@
                 sendMessage("погода " + city);
             }
         }
+        
+        // Обработка Enter в поле ввода
+        document.getElementById("customMessage").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                sendCustomMessage();
+            }
+        });
         
         // Показываем ID пользователя
         var urlParams = new URLSearchParams(window.location.search);
