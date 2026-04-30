@@ -101,24 +101,6 @@
             margin: 0;
             padding: 12px 20px;
         }
-        .link-box {
-            background: #f7fafc;
-            padding: 12px;
-            border-radius: 10px;
-            margin-top: 15px;
-            word-break: break-all;
-            font-size: 12px;
-            text-align: center;
-        }
-        .copy-btn {
-            background: #48bb78;
-            color: white;
-            padding: 8px 16px;
-            font-size: 14px;
-            margin-top: 10px;
-            width: auto;
-            display: inline-block;
-        }
         .message-preview {
             background: #edf2f7;
             padding: 10px;
@@ -126,7 +108,6 @@
             margin: 10px 0;
             font-size: 14px;
             color: #2d3748;
-            display: none;
         }
     </style>
 </head>
@@ -142,15 +123,7 @@
         <button class="btn-secondary" onclick="sendNote()">📝 Отправить заметку</button>
         <button class="btn-info" onclick="sendWeather()">🌤 Узнать погоду</button>
         
-        <div class="message-preview" id="messagePreview"></div>
-        
-        <div class="link-box" id="linkBox">
-            🔗 Ссылка для отправки сообщения:
-            <div style="margin-top: 8px;">
-                <code id="messageLink" style="font-size: 11px;">...</code>
-            </div>
-            <button class="copy-btn" onclick="copyLink()">📋 Скопировать ссылку</button>
-        </div>
+        <div class="message-preview" id="messagePreview" style="display: none;"></div>
         
         <div class="info" id="info">
             💡 Нажмите на кнопку, чтобы отправить сообщение боту
@@ -160,66 +133,91 @@
         </div>
     </div>
     
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script>
-        // ID вашего сообщества
-        var GROUP_ID = "-236570950";
-        var currentMessage = "";
+        var GROUP_ID = -236570950;
         
-        // Функция отправки сообщения
-        function sendMessage(message) {
+        // Инициализация VK Bridge
+        function initVK() {
+            if (typeof vkBridge !== 'undefined') {
+                vkBridge.send('VKWebAppInit', {});
+            }
+        }
+        
+        // Отправка сообщения через VK API
+        async function sendMessageToBot(message) {
             if (!message || !message.trim()) {
                 alert("Введите сообщение!");
                 return false;
             }
             
-            currentMessage = message;
-            
-            // Показываем сообщение для копирования
-            var previewDiv = document.getElementById("messagePreview");
-            previewDiv.style.display = "block";
-            previewDiv.innerHTML = "📤 Сообщение для отправки: <strong>" + message + "</strong>";
-            
-            // Копируем сообщение в буфер обмена
-            copyToClipboard(message);
-            
-            // Формируем ссылку на диалог с ботом (без параметра msg)
-            var url = "https://vk.com/im?sel=" + GROUP_ID;
-            document.getElementById("messageLink").innerHTML = url;
-            
-            // Открываем диалог
-            window.open(url, "_blank");
-            
-            // Обновляем статус с инструкцией
             var statusDiv = document.getElementById("status");
-            statusDiv.innerHTML = "📋 Сообщение скопировано! Вставьте его в открывшемся диалоге (Ctrl+V) и нажмите Enter";
-            statusDiv.style.background = "#fefcbf";
+            var previewDiv = document.getElementById("messagePreview");
             
-            setTimeout(function() {
-                statusDiv.innerHTML = "✅ Готово к следующей отправке";
-                statusDiv.style.background = "#c6f6d5";
-            }, 5000);
-            
-            return true;
+            try {
+                // Показываем превью
+                previewDiv.style.display = "block";
+                previewDiv.innerHTML = "📤 Отправка сообщения: <strong>" + message + "</strong>";
+                statusDiv.innerHTML = "⏳ Отправка сообщения...";
+                statusDiv.style.background = "#fefcbf";
+                
+                // Пробуем отправить через VK Bridge
+                if (typeof vkBridge !== 'undefined') {
+                    try {
+                        // Метод для открытия диалога и отправки сообщения
+                        await vkBridge.send('VKWebAppOpenWallPost', {
+                            owner_id: GROUP_ID,
+                            message: message
+                        });
+                        
+                        statusDiv.innerHTML = "✅ Сообщение успешно отправлено!";
+                        statusDiv.style.background = "#c6f6d5";
+                        return true;
+                    } catch (bridgeError) {
+                        console.log("VK Bridge не сработал:", bridgeError);
+                    }
+                }
+                
+                // Запасной вариант: открываем диалог через VK Bridge
+                if (typeof vkBridge !== 'undefined') {
+                    await vkBridge.send('VKWebAppOpenCommunity', {
+                        group_id: Math.abs(GROUP_ID)
+                    });
+                } else {
+                    // Если VK Bridge недоступен, открываем обычную ссылку
+                    window.open('https://vk.com/im?sel=' + GROUP_ID, '_blank');
+                }
+                
+                // Копируем сообщение в буфер
+                copyToClipboard(message);
+                
+                statusDiv.innerHTML = "📋 Диалог открыт! Сообщение скопировано в буфер. Вставьте его (Ctrl+V)";
+                statusDiv.style.background = "#fefcbf";
+                
+                setTimeout(function() {
+                    statusDiv.innerHTML = "✅ Готово";
+                    statusDiv.style.background = "#e6fffa";
+                }, 5000);
+                
+                return true;
+                
+            } catch (error) {
+                console.error("Ошибка отправки:", error);
+                statusDiv.innerHTML = "❌ Ошибка отправки";
+                statusDiv.style.background = "#fed7d7";
+                return false;
+            }
         }
         
-        // Копирование в буфер обмена
+        // Функция копирования в буфер
         function copyToClipboard(text) {
-            // Используем современный API
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(function() {
-                    console.log("Текст скопирован:", text);
-                }).catch(function(err) {
-                    console.error("Ошибка копирования:", err);
-                    // Запасной метод
-                    fallbackCopy(text);
-                });
+                navigator.clipboard.writeText(text).catch(fallbackCopy);
             } else {
-                // Запасной метод для старых браузеров
                 fallbackCopy(text);
             }
         }
         
-        // Запасной метод копирования
         function fallbackCopy(text) {
             var textarea = document.createElement("textarea");
             textarea.value = text;
@@ -227,34 +225,15 @@
             textarea.style.opacity = "0";
             document.body.appendChild(textarea);
             textarea.select();
-            try {
-                document.execCommand("copy");
-                console.log("Текст скопирован (fallback):", text);
-            } catch (err) {
-                console.error("Ошибка fallback копирования:", err);
-            }
+            document.execCommand("copy");
             document.body.removeChild(textarea);
-        }
-        
-        function copyLink() {
-            var link = document.getElementById("messageLink").innerHTML;
-            if (link === "...") {
-                alert("Сначала выберите сообщение для отправки!");
-                return;
-            }
-            copyToClipboard(link);
-            var statusDiv = document.getElementById("status");
-            statusDiv.innerHTML = "✅ Ссылка на диалог скопирована!";
-            statusDiv.style.background = "#c6f6d5";
-            setTimeout(function() {
-                statusDiv.innerHTML = "✅ Приложение готово";
-            }, 3000);
         }
         
         function sendCustomMessage() {
             var input = document.getElementById("customMessage");
             var message = input.value;
-            if (sendMessage(message)) {
+            if (message.trim()) {
+                sendMessageToBot(message);
                 input.value = "";
             }
         }
@@ -262,25 +241,28 @@
         function sendNote() {
             var note = prompt("📝 Введите текст заметки:", "Купить продукты");
             if (note && note.trim()) {
-                sendMessage("заметка " + note);
+                sendMessageToBot("заметка " + note);
             }
         }
         
         function sendWeather() {
             var city = prompt("🌤 Введите город:", "Москва");
             if (city && city.trim()) {
-                sendMessage("погода " + city);
+                sendMessageToBot("погода " + city);
             }
         }
         
-        // Обработка Enter в поле ввода
+        // Обработка Enter
         document.getElementById("customMessage").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 sendCustomMessage();
             }
         });
         
-        // Показываем ID пользователя
+        // Инициализация
+        initVK();
+        
+        // Показываем информацию о пользователе
         var urlParams = new URLSearchParams(window.location.search);
         var vkUserId = urlParams.get('vk_user_id');
         if (vkUserId) {
